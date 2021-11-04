@@ -1,3 +1,4 @@
+/* Controlador gestiona la asignacion de los roles a los usuarios*/
 import {service} from '@loopback/core';
 import {
   Count,

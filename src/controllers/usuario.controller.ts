@@ -1,3 +1,4 @@
+/* Controlador gestiona los usuarios creados*/
 import {service} from '@loopback/core';
 import {
   Count,

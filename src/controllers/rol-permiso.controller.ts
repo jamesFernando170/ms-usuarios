@@ -1,11 +1,12 @@
+/* Controlador que gestionan los permisos que se le asignan a cada rol*/
 import {
   Count,
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
-  import {
+import {
   del,
   get,
   getModelSchemaRef,
@@ -13,12 +14,10 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
-Rol,
-PermisoRol,
-Permiso,
+  Permiso, Rol
 } from '../models';
 import {RolRepository} from '../repositories';
 

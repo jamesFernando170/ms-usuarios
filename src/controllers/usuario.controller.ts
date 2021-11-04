@@ -337,7 +337,7 @@ export class UsuarioController {
       console.log(claveCifrada);
       let datos = new NotificacionSms();
       datos.destino = usuario.celular;
-      datos.mensaje = `Hola ${usuario.nombre} <br/> ${Configuracion.mensajeRecuperarClave} ${clave}`
+      datos.mensaje = `Hola ${usuario.nombre} ${Configuracion.mensajeRecuperarClave} ${clave}`
       this.servivioNotificaciones.EnviarSms(datos)
     }
     return usuario

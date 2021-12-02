@@ -19,12 +19,15 @@ export class SesionUsuariosService {
    */
 
   async IdentificarUsuario(credenciales: Credenciales) {
+    console.log("2" + credenciales.usuario);
     let usuario = await this.usuarioRepository.findOne({
       where: {
         correo: credenciales.usuario,
         clave: credenciales.clave
       }
     });
+    console.log(usuario?.nombre, usuario?.apellidos);
+
     return usuario;
   }
 
@@ -37,6 +40,8 @@ export class SesionUsuariosService {
 
 
     if (id_rol === undefined) {
+      console.log("ERROR");
+
       return "ERROR ROL NO VALIDO";
     } else {
       let url = `${Configuracion.url_crear_token}?${Configuracion.arg_nombre}=${datos.nombre}&${Configuracion.arg_id_persona}=${datos._id}&${Configuracion.arg_rol}=${id_rol}`;
@@ -44,6 +49,7 @@ export class SesionUsuariosService {
         .then(async (res: any) => {
           token = await res.text();
         });
+      console.log("GENERADO" + token);
 
       return token;
     }

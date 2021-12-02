@@ -16,12 +16,16 @@ export class AdministradorClavesService {
    * Add service methods here
    */
   async CambiarClave(credencialesClave: CambioClave): Promise<Usuario | null> {
+    console.log(credencialesClave.id_usuario);
+
     let usuario = await this.usuarioRepository.findOne({
       where: {
-        _id: credencialesClave.id_usuario,
+        _id: credencialesClave.id_usuario, //le cambie a correo
         clave: credencialesClave.clave_actual
       }
     });
+    console.log(usuario?.nombre);
+
     if (usuario) {
       usuario.clave = credencialesClave.nueva_clave;
       await this.usuarioRepository.updateById(credencialesClave.id_usuario, usuario)

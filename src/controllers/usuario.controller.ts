@@ -222,12 +222,18 @@ export class UsuarioController {
   @put('/usuarios/{id}')
   @response(204, {
     description: 'Usuario PUT success',
+    content: { //coloque esto
+      'application/json': {
+        schema: getModelSchemaRef(Usuario, {includeRelations: true}),
+      },
+    },
   })
   async replaceById(
     @param.path.string('id') id: string,
     @requestBody() usuario: Usuario,
-  ): Promise<void> {
-    await this.usuarioRepository.replaceById(id, usuario);
+  ): Promise<any> {
+    await this.usuarioRepository.replaceById(id, usuario); // coloque el return
+    return usuario
   }
 
   @del('/usuarios/{id}')
@@ -255,10 +261,15 @@ export class UsuarioController {
     })
     credenciales: Credenciales,
   ): Promise<object | null> {
+    console.log(credenciales.usuario, credenciales.clave);
     let usuario = await this.sesionUsuariosService.IdentificarUsuario(credenciales);
     let tk = "";
     let ObjrolesUsuario = [];
+    console.log(usuario);
+
     if (usuario) {
+      console.log("SI LO ENCONTRO PIROBO" + usuario.nombre, usuario.clave);
+
       usuario.clave = "";
       ObjrolesUsuario = await this.usuarioRolRepository.find({
         where: {
@@ -271,7 +282,7 @@ export class UsuarioController {
 
       let seleccionado = seleccionadoObj?.id_rol
       tk = await this.sesionUsuariosService.GenerarToken(usuario, ObjrolesUsuario, seleccionado)
-      console.log(tk);
+      console.log("TOKEN" + tk);
     }
     return {
       tokens: tk,
@@ -297,6 +308,7 @@ export class UsuarioController {
     credencialesClave: CambioClave,
   ): Promise<Boolean> {
     let usuario = await this.servicioClaves.CambiarClave(credencialesClave);
+    console.log("USUARIO" + usuario);
     if (usuario) {
       //Notificacion por correo o sms
       let datos = new NotificacionCorreo();

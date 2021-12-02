@@ -1,21 +1,16 @@
+/* Controlador que gestiona los permisos a los usuarios*/
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
 import {Permiso} from '../models';
 import {PermisoRepository} from '../repositories';
@@ -23,8 +18,8 @@ import {PermisoRepository} from '../repositories';
 export class PermisoController {
   constructor(
     @repository(PermisoRepository)
-    public permisoRepository : PermisoRepository,
-  ) {}
+    public permisoRepository: PermisoRepository,
+  ) { }
 
   @post('/permisos')
   @response(200, {

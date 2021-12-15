@@ -6,7 +6,9 @@ export namespace Configuracion {
   export const urlCorreo = "http://localhost:5000/correo"
   export const urlSms = "http://localhost:5000/sms"
   export const asuntoCambioClave = "Cambio de contraseña"
-  export const asuntoCreacionUsuario = "Registro en la plataforma"
+  export const asuntoCreacionUsuario = "Registro en la plataforma";
+  export const asuntoInvitacion = "Informacion disponible";
+  export const mensajeInvitacion = "el material de la solicitud ya se encuentra disponible en su perfil,  su correo es su usuario y si no recuerda su contraseña, en el sistema hay una opcion para recuperarla ";
   export const url_crear_token = "http://localhost:5001/crear-token"
   export const arg_nombre = "nombre";
   export const arg_id_persona = "id";

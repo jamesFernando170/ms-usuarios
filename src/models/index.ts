@@ -11,3 +11,5 @@ export * from './usuario-rol.model';
 export * from './usuario.model';
 
 
+export * from './credential-user.model';
+export * from './credenciales-login.model';

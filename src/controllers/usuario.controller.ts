@@ -14,7 +14,7 @@ import {
   response
 } from '@loopback/rest';
 import {Configuracion} from '../Llaves/configuracion';
-import {CambioClave, Credenciales, NotificacionCorreo, Usuario} from '../models';
+import {CambioClave, CredencialesLogin, NotificacionCorreo, Usuario} from '../models';
 import {CredencialesRecuperarClave} from '../models/credenciales-recuperar-clave.model';
 import {NotificacionSms} from '../models/notificacion-sms.model';
 //import {NotificacionCorreo, Usuario} from '../models';
@@ -61,6 +61,8 @@ export class UsuarioController {
     usuario.clave = claveCifrada
 
     let usuarioCreado = await this.usuarioRepository.create(usuario);
+    console.log(usuarioCreado);
+
 
     if (usuarioCreado) {
       // enviar clave por Correo o mensaje
@@ -71,6 +73,47 @@ export class UsuarioController {
       this.servivioNotificaciones.EnviarCorreo(datos)
     }
     return usuarioCreado;
+  }
+
+  @post('/buscarUser')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Usuario)}},
+  })
+  async createUser(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Usuario, {
+            title: 'NewUsuario',
+            exclude: ['_id'],
+          }),
+        },
+      },
+    })
+    usuario: Omit<Usuario, '_id'>,
+  ): Promise<Usuario | null> {
+    let clave = this.servicioClaves.CrearClaveAleatoria();
+
+    let claveCifrada = this.servicioClaves.CifrarTexto(clave);
+    usuario.clave = claveCifrada
+
+    let usuarioCEncontrado = await this.usuarioRepository.findOne({
+      where: {
+        nombre: usuario.nombre
+      }
+    });
+    console.log(usuarioCEncontrado);
+
+
+    /*    if (usuarioCreado) {
+         let datos = new NotificacionCorreo();
+         datos.destinatario = usuario.correo;
+         datos.asunto = Configuracion.asuntoCreacionUsuario;
+         datos.mensaje = `Hola ${usuario.nombre} <br/> ${Configuracion.mensajeCreacionUsuario} ${clave}`
+         this.servivioNotificaciones.EnviarCorreo(datos)
+       } */
+    return usuarioCEncontrado;
   }
 
   @post('/usuarioJurado')
@@ -178,7 +221,9 @@ export class UsuarioController {
     @param.path.string('id') id: string,
     @param.filter(Usuario, {exclude: 'where'}) filter?: FilterExcludingWhere<Usuario>
   ): Promise<Usuario> {
-    return this.usuarioRepository.findById(id, filter);
+    let usuario = this.usuarioRepository.findById(id, filter);
+    console.log("USER" + usuario);
+    return usuario;
   }
 
   @get('/usuarios-correo/{correo}')
@@ -198,6 +243,35 @@ export class UsuarioController {
         correo: correo
       }
     });
+
+    return usuario;
+  }
+
+  @get('/usuarios-correo2/{correo}')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Usuario, {includeRelations: true}),
+      },
+    },
+  })
+  async findBycorreito2(
+    @param.path.string('correo') correo: string
+  ): Promise<Usuario | null | string> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        correo: correo
+      }
+    });
+
+    if (usuario) {
+      let datos = new NotificacionCorreo();
+      datos.destinatario = usuario?.correo;
+      datos.asunto = Configuracion.asuntoInvitacion;
+      datos.mensaje = `Hola ${usuario.nombre} <br/> ${Configuracion.mensajeInvitacion}`
+      this.servivioNotificaciones.EnviarCorreo(datos)
+    }
 
     return usuario;
   }
@@ -248,19 +322,19 @@ export class UsuarioController {
   @post('/identificar-usuario')
   @response(200, {
     description: 'Identificación de usuarios',
-    content: {'application/json': {schema: getModelSchemaRef(Credenciales)}},
+    content: {'application/json': {schema: getModelSchemaRef(CredencialesLogin)}},
   })
   async identificarUsuario(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Credenciales, {
+          schema: getModelSchemaRef(CredencialesLogin, {
             title: 'Identificar Usuario'
           }),
         },
       },
     })
-    credenciales: Credenciales,
+    credenciales: CredencialesLogin,
   ): Promise<object | null> {
     console.log(credenciales.usuario, credenciales.clave);
     let usuario = await this.sesionUsuariosService.IdentificarUsuario(credenciales);
@@ -278,12 +352,20 @@ export class UsuarioController {
         }
       });
       console.log(ObjrolesUsuario);
-      let seleccionadoObj = await ObjrolesUsuario.find(elemento => elemento.id_rol == "61820402b9b93c16981e4f54");//"616dad9c8858b727d83b3390" IDAdminRol
-      console.log(seleccionadoObj);
+      let seleccionadoObj = await ObjrolesUsuario.find(elemento => elemento.id_rol == credenciales.rol);//"616dad9c8858b727d83b3390" IDAdminRol
+      console.log("eiconmewmoimc" + seleccionadoObj);
 
-      let seleccionado = seleccionadoObj?.id_rol
-      tk = await this.sesionUsuariosService.GenerarToken(usuario, ObjrolesUsuario, seleccionado)
-      console.log("TOKEN" + tk);
+      if (seleccionadoObj) {
+        let seleccionado = seleccionadoObj?.id_rol
+        tk = await this.sesionUsuariosService.GenerarToken(usuario, ObjrolesUsuario, seleccionado)
+        console.log("TOKEN" + tk);
+      }
+    }
+    if (tk === "") {
+      return {
+        tokens: "",
+        usuario: null
+      }
     }
     return {
       tokens: tk,
